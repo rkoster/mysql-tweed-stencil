@@ -18,7 +18,7 @@ RUN apt-get update \
 FROM ubuntu:18.04
 RUN apt-get update \
     && apt-get install --no-install-recommends -y \
-    mysql-client \
+    uuid-runtime mysql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=stage1 /bins/* /usr/bin/

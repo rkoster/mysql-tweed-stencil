@@ -1,5 +1,5 @@
-IMAGE := tweedproject/mysql-tweed-stencil
+IMAGE := rkoster/mysql-tweed-stencil
 
 default:
-	docker build -t $(IMAGE):edge .
-	docker export $(shell docker create $(IMAGE):edge) | gzip -c > ../tweed/stencils/mysql-tweed-stencil.tar.gz
+	docker build -t $(IMAGE):latest .
+	docker push $(IMAGE):latest
