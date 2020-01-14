@@ -25,25 +25,25 @@ echo
 case $INFRASTRUCTURE_TYPE in
 kubernetes)
   export KUBECONFIG=$INFRASTRUCTURE
-  NS=$(spruce merge $INPUTS stencil.yml | spruce json | jq -r '.tweed.k8s.ns')
+  NS=$(spruce merge $INPUTS ${STENCIL}/stencil.yml | spruce json | jq -r '.tweed.k8s.ns')
 
   echo
   echo "RENDERING RESOURCE TEMPLATES"
   echo "============================"
-  mkdir -p out/
+  mkdir -p ${WORKSPACE}/out
   (for what in ns svc dep pvc; do
    echo >&2 ">> rendering k8s/$what.yml ..."
    echo '---'
    spruce merge --prune tweed \
      $INPUTS \
-     stencil.yml \
-     k8s/$what.yml
-   done) > out/spec.yml
+     ${STENCIL}/stencil.yml \
+     ${STENCIL}/k8s/$what.yml
+   done) > ${WORKSPACE}/out/spec.yml
 
   echo
   echo "kubernetes spec generated!"
   echo ">> applying out/spec.yml via \`kubectl'..."
-  kubectl apply -f out/spec.yml
+  kubectl apply -f ${WORKSPACE}/out/spec.yml
   echo
   echo ">> waiting for pods to become 'ready'..."
   kubectl wait --timeout=2h -n $NS deployment/mysql --for condition=available
@@ -58,19 +58,19 @@ kubernetes)
 
 bosh)
   . $INFRASTRUCTURE
-  DEPLOYMENT=$(spruce merge $INPUTS stencil.yml | spruce json | jq -r '.tweed.bosh.deployment')
+  DEPLOYMENT=$(spruce merge $INPUTS ${STENCIL}/stencil.yml | spruce json | jq -r '.tweed.bosh.deployment')
   echo
   echo "RENDERING BOSH MANIFESTS"
   echo "========================"
   mkdir -p out/
   spruce merge --prune tweed \
     $INPUTS \
-    stencil.yml \
-    bosh/deployment.yml > out/manifest.yml
+    ${STENCIL}/stencil.yml \
+    ${STENCIL}/bosh/deployment.yml > ${WORKSPACE}/out/manifest.yml
   echo "bosh deployment manifet generated!"
   echo ">> deploying out/manifest.yml via \`bosh'..."
   bosh -d $DEPLOYMENT delete-deployment -n >&2 || true
-  bosh -d $DEPLOYMENT deploy -n --no-redact out/manifest.yml >&2
+  bosh -d $DEPLOYMENT deploy -n --no-redact ${WORKSPACE}/out/manifest.yml >&2
   NODES=$(bosh -d $DEPLOYMENT vms --json | jq -Mr '.Tables[0].Rows[].ips' | sort)
   PORT=3306
   ;;

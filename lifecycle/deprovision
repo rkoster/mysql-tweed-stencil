@@ -4,7 +4,7 @@ set -eu
 case $INFRASTRUCTURE_TYPE in
 kubernetes)
   export KUBECONFIG=$INFRASTRUCTURE
-  NS=$(spruce merge $INPUTS stencil.yml | spruce json | jq -r '.tweed.k8s.ns')
+  NS=$(spruce merge $INPUTS ${STENCIL}/stencil.yml | spruce json | jq -r '.tweed.k8s.ns')
 
   echo >&2 ">> deleting kubernetes resources..."
   kubectl delete ns $NS --wait=true
@@ -12,7 +12,7 @@ kubernetes)
 
 bosh)
   . $INFRASTRUCTURE
-  DEPLOYMENT=$(spruce merge $INPUTS stencil.yml | spruce json | jq -r '.tweed.bosh.deployment')
+  DEPLOYMENT=$(spruce merge $INPUTS ${STENCIL}/stencil.yml | spruce json | jq -r '.tweed.bosh.deployment')
 
   echo >&2 ">> deleting bosh deployment..."
   bosh -d $DEPLOYMENT delete-deployment -n >&2

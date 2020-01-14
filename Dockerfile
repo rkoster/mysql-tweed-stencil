@@ -22,4 +22,4 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=stage1 /bins/* /usr/bin/
-ADD . /tweed
+ADD . /stencil

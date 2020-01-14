@@ -11,7 +11,7 @@ echo >&2 ">> bound user is '$BOUND_USER'"
 case $INFRASTRUCTURE_TYPE in
 kubernetes)
   export KUBECONFIG=$INFRASTRUCTURE
-  NS=$(spruce merge $INPUTS stencil.yml | spruce json | jq -r '.tweed.k8s.ns')
+  NS=$(spruce merge $INPUTS ${STENCIL}/stencil.yml | spruce json | jq -r '.tweed.k8s.ns')
   kubectl get ns $NS >/dev/null
   NODES=$(kubectl get nodes -o json | jq -Mr '.items[].status.addresses[] | select(.type == "ExternalIP") | .address' | sort)
   PORT=$(kubectl get -n $NS service/mysql -o jsonpath --template '{.spec.ports[0].nodePort}')
@@ -19,7 +19,7 @@ kubernetes)
 
 bosh)
   . $INFRASTRUCTURE
-  DEPLOYMENT=$(spruce merge $INPUTS stencil.yml | spruce json | jq -r '.tweed.bosh.deployment')
+  DEPLOYMENT=$(spruce merge $INPUTS ${STENCIL}/stencil.yml | spruce json | jq -r '.tweed.bosh.deployment')
   bosh env >/dev/null
   NODES=$(bosh -d $DEPLOYMENT vms --json | jq -Mr '.Tables[0].Rows[].addresses' | sort)
   PORT=3306
